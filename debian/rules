@@ -1,0 +1,157 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null)
+DEB_HOST_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null)
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS 2>/dev/null)
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE 2>/dev/null)
+
+VERSION = $(shell dpkg-parsechangelog | grep ^Version: | cut -d ' ' -f 2)
+EXTRA_VERSION = Slind $(VERSION)
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CONFIG_DEBUG = y
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+endif
+
+export EXTRA_VERSION CONFIG_DEBUG
+
+PACKAGE_PREFIX = busybox
+VERSION = $(shell dpkg-parsechangelog|awk '/^Version: / {print $$2}')
+VARIANTS := busybox
+#
+# Uncomment this and parts of debian/control to enable building all variants of busybox
+#
+# VARIANTS := busybox busybox-tiny busybox-static busybox-heavy
+
+CONFIG = debian/config-slind
+ifneq ($(CONFIG_CUSTOM),)
+  CONFIG_DEB = $(CONFIG_CUSTOM)
+  PACKAGES = $(PACKAGE_PREFIX)
+  VERSION_APPENDED = -- -v$(VERSION)+custom0
+else
+  CONFIG_DEB = $(CONFIG)
+  PACKAGES = $(VARIANTS)
+endif
+CONFIG_STATIC = $(CONFIG)-static
+
+build-arch: build-arch-deb-all
+ifneq ($(CONFIG_CUSTOM),)
+build-arch-deb-all: build-arch-deb
+else
+build-arch-deb-all: $(patsubst %,build-arch-deb-%,$(VARIANTS))
+endif
+
+.NOTPARALLEL: build-arch-deb build-arch-static
+
+#build-arch-deb: patch-stamp build-arch-deb-stamp
+$(patsubst %,build-arch-deb-%,$(VARIANTS)) :: build-arch-deb-% : patch-stamp build-arch-deb-%-stamp
+build-arch-deb-%-stamp:
+	$(MAKE) clean
+
+	@CURVAR=$(patsubst build-arch-deb-%-stamp,%,$@); \
+	cp $(CURDIR)/debian/config-$$CURVAR .config && \
+	echo "Configuring $$CURVAR variant of busybox" && \
+	sed -i -e "s,_install,install-$$CURVAR," .config && \
+	$(MAKE) oldconfig ARCH=$(DEB_HOST_ARCH_CPU) CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
+	echo "Building $$CURVAR variant of busybox" && \
+	$(MAKE) && \
+	echo "Installing $$CURVAR variant of busybox" && \
+	install -d install-$$CURVAR/bin && \
+	install -d install-$$CURVAR/etc/init.d && \
+	install busybox install-$$CURVAR/bin/busybox && \
+	$(MAKE) PREFIX=$(CURDIR)/install-$$CURVAR install && \
+	install -m 644 debian/inittab $(CURDIR)/install-$$CURVAR/etc/inittab && \
+	install -m 755 debian/modules $(CURDIR)/install-$$CURVAR/etc/init.d/modules && \
+	install -m 755 debian/hwclock $(CURDIR)/install-$(PACKAGE_PREFIX)/etc/init.d/hwclock
+
+	touch $@
+
+build-indep: build-indep-stamp
+
+build-indep-stamp:
+	dh_testdir
+
+	mkdir -p $(CURDIR)/debian/mdev/etc
+	touch $(CURDIR)/debian/mdev/etc/mdev.conf
+	touch $@
+
+build: build-arch build-indep
+
+clean: clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	rm -f build-*-stamp
+
+	-$(MAKE) distclean
+	-rm -rf install* busybox.1
+
+	dh_clean
+
+# quilt stuff
+patch: patch-stamp
+patch-stamp:
+	QUILT_PATCHES=$(CURDIR)/debian/patches quilt push -a
+	touch $@
+
+unpatch:
+	-QUILT_PATCHES=$(CURDIR)/debian/patches quilt pop -a
+	rm -f patch-stamp
+
+install: build-arch
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	for i in $(PACKAGES); do \
+	( \
+		cd install-$$i; \
+		find . -type d -exec install -d $(CURDIR)/debian/$$i/{} \;; \
+		find . \( -type f -o -type l \) -exec cp -a {} $(CURDIR)/debian/$$i/{} \;; \
+	); \
+	done
+
+	#install -m644 debian/$(PACKAGE_PREFIX)-static.override \
+	#	debian/$(PACKAGE_PREFIX)-static/usr/share/lintian/overrides/$(PACKAGE_PREFIX)-static
+
+# Build architecture-dependent files here.
+binary-arch: build-arch install
+	dh_testdir
+	dh_testroot
+ifneq (,$(findstring docs,$(SLIND_BUILD_OPTIONS)))
+	dh_installdocs -s
+	dh_installchangelogs -s
+endif
+	dh_strip -s
+	dh_link -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s $(VERSION_APPENDED)
+	dh_md5sums -s
+	dh_builddeb -s
+
+binary-indep: install
+	dh_testdir
+	dh_testroot
+ifneq (,$(findstring docs,$(SLIND_BUILD_OPTIONS)))
+	dh_installdocs -i
+	dh_istallchangelogs -i
+endif
+	dh_installinit -i --no-start -- start 03 S .
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i $(VERSION_APPENDED)
+	dh_md5sums -i
+	dh_builddeb -i
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

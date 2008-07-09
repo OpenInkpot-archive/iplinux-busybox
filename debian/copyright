@@ -1,0 +1,22 @@
+This is the Slind prepackaged version of busybox.
+
+Slind patches are:
+	Copyright (C) 2005, 2006 Siemens AG.
+
+Original package was put together by Erik Andersen <andersee@debian.org>.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of version 2 of the the GNU General Public License
+   as published by the Free Software Foundation.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
+
+On Debian systems, the complete text of the GNU General Public License
+can be found in `/usr/share/common-licenses/GPL'.

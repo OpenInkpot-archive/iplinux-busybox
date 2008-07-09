@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+echo "Setting up system clock"
+
+case "$1" in
+	start)
+		/sbin/hwclock -s -u
+		;;
+	stop)
+		/sbin/hwclock -w -u
+		;;
+esac
+echo "Done."
+

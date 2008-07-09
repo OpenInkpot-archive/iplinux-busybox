@@ -1,0 +1,5 @@
+#!/bin/sh
+
+update-rc.d modules start 05 S . > /dev/null
+update-rc.d hwclock start 22 S . stio 25 0 6 . > /dev/null
+

@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+MODULES_FILE=/etc/modules
+
+echo "Loading kernel modules"
+
+cat $MODULES_FILE | while read mod; do
+	echo "   $mod"
+	modprobe $mod
+done
+
+echo "Done loading modules"
+

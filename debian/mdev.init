@@ -1,0 +1,81 @@
+#!/bin/sh -e
+
+tmpfs_size=10M
+
+unmount_fs_in_dev() {
+  if mountpoint -q /dev/pts/; then
+    umount -n -l /dev/pts/
+  fi
+
+  if mountpoint -q /dev/shm/; then
+    umount -n -l /dev/shm/
+  fi
+}
+
+mount_fs_in_dev() {
+  mkdir -p /dev/pts
+  if ! mount -t devpts devpts /dev/pts; then
+    echo "Error: unable to mount /dev/pts over tmpfs on /dev. Aborting."
+    exit 1
+  fi
+
+  mkdir -p /dev/shm
+  if ! mount -o nosuid,nodev,size=$tmpfs_size -t tmpfs tmpfs /dev/shm; then
+    echo "Error: unable to mount /dev/shm over tmpfs on /dev. Aborting."
+    exit 1
+  fi
+}
+
+mount_tmpfs() {
+  if ! mount -n -o size=$tmpfs_size,mode=0755 -t tmpfs tmpfs /dev; then
+    echo "Error: mdev requires tmpfs support, not started."
+    exit 1
+  fi
+}
+
+unmount_tmpfs() {
+  if ! umount -n -l /dev; then
+    echo "Error: unable to unmount /dev."
+  fi
+}
+
+[ -x /sbin/mdev ] || exit 0
+
+case "$1" in
+  start)
+    if mountpoint -q /dev; then
+      echo "Error: mdev is already active on /dev."
+      exit 1
+    fi
+
+    echo > /proc/sys/kernel/hotplug
+    unmount_fs_in_dev
+    mount_tmpfs
+    mount_fs_in_dev
+    echo /sbin/mdev > /proc/sys/kernel/hotplug
+    mdev -s
+    ;;
+  stop)
+    if ! mountpoint -q /dev; then
+      echo "Error: mdev is not active on /dev."
+      exit 1
+    fi
+
+    echo > /proc/sys/kernel/hotplug
+    unmount_fs_in_dev
+    unmount_tmpfs
+    mount_fs_in_dev
+    ;;
+
+  restart|force-reload)
+    $0 stop
+    $0 start
+    ;;
+
+  *)
+    echo "Usage: /etc/init.d/mdev {start|stop|restart|force-reload}"
+    exit 1
+    ;;
+esac
+
+exit 0
