@@ -1,3 +1,11 @@
+busybox (1:1.11.2-0.oi2) unstable; urgency=low
+
+  * Disabled mountpoint, present in initscripts package.
+  * Enabled vi
+  * Enabled fdisk
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 30 Aug 2008 04:16:34 +0700
+
 busybox (1:1.11.2-0.oi1) unstable; urgency=low
 
   * New upstream version.
