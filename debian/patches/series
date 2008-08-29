@@ -1,1 +1,2 @@
-0004-backported-depmod-from-slind-build-of-bb-1.01.patch
+# quilt does not like empty series file
+
