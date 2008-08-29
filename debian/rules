@@ -3,6 +3,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+include /usr/share/quilt/quilt.make
+
 DEB_HOST_ARCH ?= $(shell dpkg-architecture -qDEB_HOST_ARCH 2>/dev/null)
 DEB_HOST_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null)
 DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS 2>/dev/null)
@@ -21,7 +23,7 @@ export EXTRA_VERSION CONFIG_DEBUG
 
 PACKAGE_PREFIX = busybox
 VERSION = $(shell dpkg-parsechangelog|awk '/^Version: / {print $$2}')
-VARIANTS := busybox
+VARIANTS := busybox busybox-static
 #
 # Uncomment this and parts of debian/control to enable building all variants of busybox
 #
@@ -48,7 +50,7 @@ endif
 .NOTPARALLEL: build-arch-deb build-arch-static
 
 #build-arch-deb: patch-stamp build-arch-deb-stamp
-$(patsubst %,build-arch-deb-%,$(VARIANTS)) :: build-arch-deb-% : patch-stamp build-arch-deb-%-stamp
+$(patsubst %,build-arch-deb-%,$(VARIANTS)) :: build-arch-deb-% : patch build-arch-deb-%-stamp
 build-arch-deb-%-stamp:
 	$(MAKE) clean
 
@@ -91,16 +93,6 @@ clean-patched:
 	-rm -rf install* busybox.1
 
 	dh_clean
-
-# quilt stuff
-patch: patch-stamp
-patch-stamp:
-	QUILT_PATCHES=$(CURDIR)/debian/patches quilt push -a
-	touch $@
-
-unpatch:
-	-QUILT_PATCHES=$(CURDIR)/debian/patches quilt pop -a
-	rm -f patch-stamp
 
 install: build-arch
 	dh_testdir
