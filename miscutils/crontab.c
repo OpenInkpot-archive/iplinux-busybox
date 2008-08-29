@@ -85,7 +85,7 @@ static int open_as_user(const struct passwd *pas, const char *file)
 }
 
 int crontab_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
-int crontab_main(int argc ATTRIBUTE_UNUSED, char **argv)
+int crontab_main(int argc UNUSED_PARAM, char **argv)
 {
 	const struct passwd *pas;
 	const char *crontab_dir = CRONTABS;
@@ -129,11 +129,11 @@ int crontab_main(int argc ATTRIBUTE_UNUSED, char **argv)
 		if (!pas)
 			bb_error_msg_and_die("user %s is not known", user_name);
 	} else {
+/* XXX: xgetpwuid */
 		uid_t my_uid = getuid();
 		pas = getpwuid(my_uid);
 		if (!pas)
-			bb_perror_msg_and_die("no user record for UID %u",
-					(unsigned)my_uid);
+			bb_perror_msg_and_die("unknown uid %d", (int)my_uid);
 	}
 
 #define user_name DONT_USE_ME_BEYOND_THIS_POINT
