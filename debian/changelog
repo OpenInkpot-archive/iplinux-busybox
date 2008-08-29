@@ -1,3 +1,13 @@
+busybox (1:1.11.2-0.oi1) unstable; urgency=low
+
+  * New upstream version.
+  * Removed patch 0001-busybox-1.10.2-mdev.patch, applied upstream.
+  * Removed patch
+    0004-backported-depmod-from-slind-build-of-bb-1.01.patch, equivalent
+    functionality implemented upstream.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 30 Aug 2008 00:57:46 +0700
+
 busybox (1:1.10.2-0.oi3) unstable; urgency=low
 
   * Added separate binary package mdev.
