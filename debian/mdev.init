@@ -52,6 +52,7 @@ case "$1" in
     unmount_fs_in_dev
     mount_tmpfs
     mount_fs_in_dev
+    echo > /dev/mdev.seq
     echo /sbin/mdev > /proc/sys/kernel/hotplug
     mdev -s
     ;;
