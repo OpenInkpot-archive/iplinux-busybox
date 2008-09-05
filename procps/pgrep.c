@@ -43,7 +43,7 @@ static void act(unsigned pid, char *cmd, int signo, unsigned opt)
 }
 
 int pgrep_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
-int pgrep_main(int argc ATTRIBUTE_UNUSED, char **argv)
+int pgrep_main(int argc UNUSED_PARAM, char **argv)
 {
 	unsigned pid = getpid();
 	int signo = SIGTERM;
@@ -111,8 +111,15 @@ int pgrep_main(int argc ATTRIBUTE_UNUSED, char **argv)
 		if (proc->pid == pid)
 			continue;
 		cmd = proc->argv0;
-		if (!cmd)
+		if (!cmd) {
 			cmd = proc->comm;
+		} else {
+			int i = proc->argv_len;
+			while (i) {
+				if (!cmd[i]) cmd[i] = ' ';
+				i--;
+			}
+		}
 		/* NB: OPT_INVERT is always 0 or 1 */
 		if ((regexec(&re_buffer, cmd, 1, re_match, 0) == 0 /* match found */
 		     && (!OPT_ANCHOR || (re_match[0].rm_so == 0 && re_match[0].rm_eo == (regoff_t)strlen(cmd)))) ^ OPT_INVERT

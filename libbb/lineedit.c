@@ -15,17 +15,23 @@
  */
 
 /*
-   Usage and known bugs:
-   Terminal key codes are not extensive, and more will probably
-   need to be added. This version was created on Debian GNU/Linux 2.x.
-   Delete, Backspace, Home, End, and the arrow keys were tested
-   to work in an Xterm and console. Ctrl-A also works as Home.
-   Ctrl-E also works as End.
-
-   Small bugs (simple effect):
-   - not true viewing if terminal size (x*y symbols) less
-     size (prompt + editor's line + 2 symbols)
-   - not true viewing if length prompt less terminal width
+ * Usage and known bugs:
+ * Terminal key codes are not extensive, and more will probably
+ * need to be added. This version was created on Debian GNU/Linux 2.x.
+ * Delete, Backspace, Home, End, and the arrow keys were tested
+ * to work in an Xterm and console. Ctrl-A also works as Home.
+ * Ctrl-E also works as End.
+ *
+ * lineedit does not know that the terminal escape sequences do not
+ * take up space on the screen. The redisplay code assumes, unless
+ * told otherwise, that each character in the prompt is a printable
+ * character that takes up one character position on the screen.
+ * You need to tell lineedit that some sequences of characters
+ * in the prompt take up no screen space. Compatibly with readline,
+ * use the \[ escape to begin a sequence of non-printing characters,
+ * and the \] escape to signal the end of such a sequence. Example:
+ *
+ * PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
  */
 
 #include "libbb.h"
@@ -339,7 +345,7 @@ static void input_delete(int save)
 	}
 #endif
 
-	strcpy(command_ps + j, command_ps + j + 1);
+	overlapping_strcpy(command_ps + j, command_ps + j + 1);
 	command_len--;
 	input_end();                    /* rewrite new line */
 	cmdedit_set_out_char(' ');      /* erase char */
@@ -394,11 +400,8 @@ static void free_tab_completion_data(void)
 
 static void add_match(char *matched)
 {
-	int nm = num_matches;
-	int nm1 = nm + 1;
-
-	matches = xrealloc(matches, nm1 * sizeof(char *));
-	matches[nm] = matched;
+	matches = xrealloc_vector(matches, 4, num_matches);
+	matches[num_matches] = matched;
 	num_matches++;
 }
 
@@ -986,7 +989,7 @@ static void load_history(const char *fromfile)
 
 	/* NB: do not trash old history if file can't be opened */
 
-	fp = fopen(fromfile, "r");
+	fp = fopen_for_read(fromfile);
 	if (fp) {
 		/* clean up old history */
 		for (hi = state->cnt_history; hi > 0;) {
@@ -1019,7 +1022,7 @@ static void save_history(const char *tofile)
 {
 	FILE *fp;
 
-	fp = fopen(tofile, "w");
+	fp = fopen_for_write(tofile);
 	if (fp) {
 		int i;
 
@@ -1352,8 +1355,9 @@ static void win_changed(int nsig)
  * 0  on ctrl-C (the line entered is still returned in 'command'),
  * >0 length of input string, including terminating '\n'
  */
-int read_line_input(const char *prompt, char *command, int maxsize, line_input_t *st)
+int FAST_FUNC read_line_input(const char *prompt, char *command, int maxsize, line_input_t *st)
 {
+	int len;
 #if ENABLE_FEATURE_TAB_COMPLETION
 	smallint lastWasTab = FALSE;
 #endif
@@ -1373,7 +1377,6 @@ int read_line_input(const char *prompt, char *command, int maxsize, line_input_t
 	 || !(initial_settings.c_lflag & ECHO)
 	) {
 		/* Happens when e.g. stty -echo was run before */
-		int len;
 		parse_and_put_prompt(prompt);
 		fflush(stdout);
 		if (fgets(command, maxsize, stdin) == NULL)
@@ -1549,7 +1552,7 @@ int read_line_input(const char *prompt, char *command, int maxsize, line_input_t
 		vi_case(CTRL('U')|vbit:)
 			/* Control-U -- Clear line before cursor */
 			if (cursor) {
-				strcpy(command, command + cursor);
+				overlapping_strcpy(command, command + cursor);
 				command_len -= cursor;
 				redraw(cmdedit_y, command_len);
 			}
@@ -1840,12 +1843,13 @@ int read_line_input(const char *prompt, char *command, int maxsize, line_input_t
 	signal(SIGWINCH, previous_SIGWINCH_handler);
 	fflush(stdout);
 
+	len = command_len;
 	DEINIT_S();
 
-	return command_len;
+	return len; /* can't return command_len, DEINIT_S() destroys it */
 }
 
-line_input_t *new_line_input_t(int flags)
+line_input_t* FAST_FUNC new_line_input_t(int flags)
 {
 	line_input_t *n = xzalloc(sizeof(*n));
 	n->flags = flags;
@@ -1855,7 +1859,7 @@ line_input_t *new_line_input_t(int flags)
 #else
 
 #undef read_line_input
-int read_line_input(const char* prompt, char* command, int maxsize)
+int FAST_FUNC read_line_input(const char* prompt, char* command, int maxsize)
 {
 	fputs(prompt, stdout);
 	fflush(stdout);
