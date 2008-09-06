@@ -1,0 +1,327 @@
+Index: busybox/include/applets.h
+===================================================================
+--- busybox.orig/include/applets.h	2008-09-06 13:09:31.000000000 +0700
++++ busybox/include/applets.h	2008-09-06 13:10:05.000000000 +0700
+@@ -139,6 +139,7 @@
+ USE_ENV(APPLET(env, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+ USE_ENVDIR(APPLET_ODDNAME(envdir, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envdir))
+ USE_ENVUIDGID(APPLET_ODDNAME(envuidgid, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envuidgid))
++USE_ESPLASH(APPLET(esplash, _BB_DIR_SBIN, _BB_SUID_NEVER))
+ USE_ETHER_WAKE(APPLET_ODDNAME(ether-wake, ether_wake, _BB_DIR_USR_BIN, _BB_SUID_NEVER, ether_wake))
+ USE_EXPAND(APPLET(expand, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+ USE_EXPR(APPLET(expr, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+Index: busybox/include/usage.h
+===================================================================
+--- busybox.orig/include/usage.h	2008-09-06 13:09:31.000000000 +0700
++++ busybox/include/usage.h	2008-09-06 13:10:05.000000000 +0700
+@@ -127,6 +127,19 @@
+        "$ basename /foo/bar.txt .txt\n" \
+        "bar"
+ 
++#define esplash_trivial_usage \
++       "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
++#define esplash_full_usage "\n\n" \
++       "Options:\n" \
++     "\n	-s	Image" \
++     "\n	-c	Hide cursor" \
++     "\n	-d	Framebuffer device (default /dev/fb0)" \
++     "\n	-i	Config file (var=value):" \
++     "\n			BAR_LEFT,BAR_TOP,BAR_WIDTH,BAR_HEIGHT" \
++     "\n			BAR_COLOR" \
++     "\n	-f	Control pipe (else exit after drawing image)" \
++     "\n			commands: 'NN' (% for progress bar) or 'exit'" \
++
+ #define fbsplash_trivial_usage \
+        "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
+ #define fbsplash_full_usage "\n\n" \
+@@ -140,7 +153,7 @@
+      "\n	-f	Control pipe (else exit after drawing image)" \
+      "\n			commands: 'NN' (% for progress bar) or 'exit'" \
+ 
+-#define brctl_trivial_usage \
++#define brctl_trivial_usage                     \
+        "COMMAND [BRIDGE [INTERFACE]]"
+ #define brctl_full_usage "\n\n" \
+        "Manage ethernet bridges.\n" \
+Index: busybox/miscutils/Config.in
+===================================================================
+--- busybox.orig/miscutils/Config.in	2008-09-06 13:09:31.000000000 +0700
++++ busybox/miscutils/Config.in	2008-09-06 13:10:05.000000000 +0700
+@@ -202,6 +202,25 @@
+ 	  Add the -s option to eject, this allows to eject SCSI-Devices and
+ 	  usb-storage devices.
+ 
++config ESPLASH
++	bool "esplash"
++	default n
++	help
++	  Shows splash image and progress bar on 8bpp framebuffer device.
++	  Can be used during boot phase of an embedded device. ~2kb.
++	  Usage:
++	  - put somewhere esplash.cfg file and an image in framebuffer's format
++	    (possibly compressed: .gz, .bz2 and .lzma are recognized)
++	  - $ setsid esplash [params] &
++	    -c: hide cursor
++	    -d /dev/fbN: framebuffer device (if not /dev/fb0)
++	    -s path_to_image_file
++	    -i path_to_cfg_file (can be "-" for stdin)
++	    -f path_to_fifo (can be "-" for stdin)
++	  - commands for fifo:
++	    "NN" (ASCII decimal number) - percentage to show on progress bar
++	    "exit" - well you guessed it
++
+ config FBSPLASH
+ 	bool "fbsplash"
+ 	default n
+Index: busybox/miscutils/esplash.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ busybox/miscutils/esplash.c	2008-09-06 13:10:05.000000000 +0700
+@@ -0,0 +1,221 @@
++/* vi: set sw=4 ts=4: */
++/*
++ * Copyright (C) 2008 Mikhail Gusarov <dottedmag@dottedmag.net>
++ *
++ * Based on fbsplash.c by Michele Sanges <michele.sanges@otomelara.it>,
++ * <michele.sanges@gmail.it>
++ *
++ * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
++ *
++ * Usage:
++ * - put somewhere esplash.cfg file and an image (fb dump, possibly compressed).
++ * - run applet: $ setsid esplash [params] &
++ *      -c: hide cursor
++ *      -d /dev/fbN: framebuffer device (if not /dev/fb0)
++ *      -s path_to_image_file
++ *      -i path_to_cfg_file
++ *      -f path_to_fifo (can be "-" for stdin)
++ * - commands for fifo:
++ *   "NN" (ASCII decimal number) - percentage to show on progress bar.
++ *   "exit" (or just close fifo) - well you guessed it.
++ */
++
++#include "libbb.h"
++#include <linux/fb.h>
++
++#define CONFIG_OPTIONS 5
++
++struct globals {
++	unsigned char *addr;	// pointer to framebuffer memory
++	unsigned ns[CONFIG_OPTIONS];	// n-parameters
++	unsigned last_percent;	// boot percent displayed last time
++	const char *image_filename;
++	struct fb_var_screeninfo scr_var;
++	struct fb_fix_screeninfo scr_fix;
++};
++#define G (*ptr_to_globals)
++#define INIT_G() do { \
++	SET_PTR_TO_GLOBALS(xzalloc(sizeof(G))); \
++} while (0)
++
++#define nbar_width	ns[0]	// progress bar width
++#define nbar_height	ns[1]	// progress bar height
++#define nbar_posx	ns[2]	// progress bar horizontal position
++#define nbar_posy	ns[3]	// progress bar vertical position
++#define nbar_col	ns[4]	// progress bar color
++
++/**
++ * Draw filled rectangle on framebuffer
++ * \param from_x,from_y upper left position
++ * \param to_x,to_y down right position, not including
++ * \param n color
++ */
++static void fb_drawfullrectangle(int from_x, int from_y, int to_x, int to_y,
++	unsigned char n)
++{
++	int cnt1, cnt2, nypos;
++	unsigned char *ptr;
++
++	cnt1 = to_y - from_y;
++	nypos = from_y;
++	do {
++		ptr = G.addr + (nypos * G.scr_var.xres + from_x);
++		cnt2 = to_x - from_x;
++		do {
++			*ptr++ = n;
++		} while (--cnt2 > 0);
++
++		nypos++;
++	} while (--cnt1 > 0);
++}
++
++
++/**
++ *	Draw a progress bar on framebuffer
++ * \param percent percentage of loading
++ */
++static void fb_drawprogressbar(unsigned percent)
++{
++	// [from_x, to_x)
++	int from_x = G.nbar_width * G.last_percent / 100;
++	int to_x = G.nbar_width * percent / 100;
++
++	// [from_y, to_y)
++	int from_y = G.nbar_posy;
++	int to_y = G.nbar_posy + G.nbar_height;
++
++	if(percent <= G.last_percent)
++		return;
++
++	fb_drawfullrectangle(from_x, from_y, to_x, to_y, G.nbar_col);
++
++	G.last_percent = percent;
++}
++
++/**
++ *	Open and initialize the framebuffer device
++ * \param *strfb_device pointer to framebuffer device
++ */
++static void fb_open(const char *strfb_device)
++{
++	int fbfd = xopen(strfb_device, O_RDWR);
++	int themefd = open_zipped(G.image_filename);
++
++	// framebuffer properties
++	xioctl(fbfd, FBIOGET_VSCREENINFO, &G.scr_var);
++	xioctl(fbfd, FBIOGET_FSCREENINFO, &G.scr_fix);
++
++	if (G.scr_var.bits_per_pixel != 8)
++		bb_error_msg_and_die("only 8 bpp is supported");
++
++	bb_copyfd_size(themefd, fbfd, G.scr_var.xres * G.scr_var.yres);
++	close(themefd);
++
++	// map the device in memory
++	G.addr = mmap(NULL,
++			G.scr_var.xres * G.scr_var.yres,
++			PROT_WRITE, MAP_SHARED, fbfd, 0);
++	if (G.addr == MAP_FAILED)
++		bb_perror_msg_and_die("can't mmap %s", strfb_device);
++	close(fbfd);
++}
++
++/**
++ *	Parse configuration file
++ * \param *cfg_filename name of the configuration file
++ */
++static void init(const char *cfg_filename)
++{
++	static const char const param_names[] ALIGN1 =
++		"BAR_WIDTH\0" "BAR_HEIGHT\0"
++		"BAR_LEFT\0" "BAR_TOP\0"
++		"BAR_COLOR\0"
++		;
++	char *token[2];
++	parser_t *parser = config_open2(cfg_filename, xfopen_stdin);
++	while (config_read(parser, token, 2, 2, "#=",
++				    (PARSE_NORMAL | PARSE_MIN_DIE) & ~(PARSE_TRIM | PARSE_COLLAPSE))) {
++		unsigned val = xatoi_u(token[1]);
++		int i = index_in_strings(param_names, token[0]);
++		if (i < 0)
++			bb_error_msg_and_die("syntax error: '%s'", token[0]);
++		if (i >= 0 && i < CONFIG_OPTIONS)
++			G.ns[i] = val;
++	}
++	config_close(parser);
++}
++
++
++int esplash_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
++int esplash_main(int argc UNUSED_PARAM, char **argv)
++{
++	const char *fb_device, *cfg_filename, *fifo_filename;
++	FILE *fp = fp; // for compiler
++	char *num_buf;
++	unsigned num;
++	bool bCursorOff;
++
++	INIT_G();
++
++	// parse command line options
++	fb_device = "/dev/fb0";
++	cfg_filename = NULL;
++	fifo_filename = NULL;
++	bCursorOff = 1 & getopt32(argv, "cs:d:i:f:",
++			&G.image_filename, &fb_device, &cfg_filename, &fifo_filename);
++
++	// parse configuration file
++	if (cfg_filename)
++		init(cfg_filename);
++
++	// We must have -s IMG
++	if (!G.image_filename)
++		bb_show_usage();
++
++	if (fifo_filename && bCursorOff) {
++		// hide cursor (BEFORE any fb ops)
++		full_write(STDOUT_FILENO, "\x1b" "[?25l", 6);
++	}
++
++	fb_open(fb_device);
++
++	if (!fifo_filename)
++		return EXIT_SUCCESS;
++
++	fp = xfopen_stdin(fifo_filename);
++	if (fp != stdin) {
++		// For named pipes, we want to support this:
++		//  mkfifo cmd_pipe
++		//  esplash -f cmd_pipe .... &
++		//  ...
++		//  echo 33 >cmd_pipe
++		//  ...
++		//  echo 66 >cmd_pipe
++		// This means that we don't want esplash to get EOF
++		// when last writer closes input end.
++		// The simplest way is to open fifo for writing too
++		// and become an additional writer :)
++		open(fifo_filename, O_WRONLY); // errors are ignored
++	}
++
++	fb_drawprogressbar(0);
++	// Block on read, waiting for some input.
++	// Use of <stdio.h> style I/O allows to correctly
++	// handle a case when we have many buffered lines
++	// already in the pipe
++	while ((num_buf = xmalloc_fgetline(fp)) != NULL) {
++		if (strncmp(num_buf, "exit", 4) == 0) {
++			break;
++		}
++		num = atoi(num_buf);
++		if (isdigit(num_buf[0]) && (num <= 100)) {
++			fb_drawprogressbar(num);
++		}
++		free(num_buf);
++	}
++
++	if (bCursorOff) // restore cursor
++		full_write(STDOUT_FILENO, "\x1b" "[?25h", 6);
++
++	return EXIT_SUCCESS;
++}
+Index: busybox/miscutils/esplash.cfg
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ busybox/miscutils/esplash.cfg	2008-09-06 13:10:05.000000000 +0700
+@@ -0,0 +1,9 @@
++# progress bar position
++BAR_LEFT=170
++BAR_TOP=300
++BAR_WIDTH=300
++BAR_HEIGHT=20
++# progress bar color
++BAR_R=80
++BAR_G=80
++BAR_B=130
+Index: busybox/miscutils/Kbuild
+===================================================================
+--- busybox.orig/miscutils/Kbuild	2008-09-06 13:09:31.000000000 +0700
++++ busybox/miscutils/Kbuild	2008-09-06 13:10:05.000000000 +0700
+@@ -14,6 +14,7 @@
+ lib-$(CONFIG_DC)          += dc.o
+ lib-$(CONFIG_DEVFSD)      += devfsd.o
+ lib-$(CONFIG_EJECT)       += eject.o
++lib-$(CONFIG_ESPLASH)     += esplash.o
+ lib-$(CONFIG_FBSPLASH)    += fbsplash.o
+ lib-$(CONFIG_HDPARM)      += hdparm.o
+ lib-$(CONFIG_INOTIFYD)    += inotifyd.o
