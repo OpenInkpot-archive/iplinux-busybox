@@ -1,3 +1,10 @@
+busybox (1:1.12.0-0.oi2) asimov; urgency=low
+
+  * Added esplash - simple bootsplash for 8bpp framebuffers.
+  * Config files updated: esplash enabled.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 06 Sep 2008 13:17:43 +0700
+
 busybox (1:1.12.0-0.oi1) asimov; urgency=low
 
   * New upstream version.
