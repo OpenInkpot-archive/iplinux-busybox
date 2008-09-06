@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.12.0
-# Sat Sep  6 01:08:31 2008
+# Sat Sep  6 13:13:32 2008
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -566,6 +566,7 @@ CONFIG_FEATURE_MTAB_SUPPORT=y
 # CONFIG_FEATURE_DEVFS is not set
 # CONFIG_EJECT is not set
 # CONFIG_FEATURE_EJECT_SCSI is not set
+CONFIG_ESPLASH=y
 # CONFIG_FBSPLASH is not set
 CONFIG_INOTIFYD=y
 CONFIG_LAST=y
