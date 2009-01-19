@@ -58,14 +58,14 @@ build-arch-deb-%-stamp:
 	cp $(CURDIR)/debian/config-$$CURVAR .config && \
 	echo "Configuring $$CURVAR variant of busybox" && \
 	sed -i -e "s,_install,install-$$CURVAR," .config && \
-	$(MAKE) oldconfig ARCH=$(DEB_HOST_ARCH_CPU) CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
+	$(MAKE) oldconfig CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
 	echo "Building $$CURVAR variant of busybox" && \
-	$(MAKE) && \
+	$(MAKE) CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- && \
 	echo "Installing $$CURVAR variant of busybox" && \
 	install -d install-$$CURVAR/bin && \
 	install -d install-$$CURVAR/etc/init.d && \
 	install busybox install-$$CURVAR/bin/busybox && \
-	$(MAKE) PREFIX=$(CURDIR)/install-$$CURVAR install && \
+	$(MAKE) CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- PREFIX=$(CURDIR)/install-$$CURVAR install && \
 	install -m 644 debian/inittab $(CURDIR)/install-$$CURVAR/etc/inittab && \
 	install -m 755 debian/modules $(CURDIR)/install-$$CURVAR/etc/init.d/modules && \
 	install -m 755 debian/hwclock $(CURDIR)/install-$(PACKAGE_PREFIX)/etc/init.d/hwclock
