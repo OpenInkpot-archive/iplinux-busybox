@@ -87,7 +87,6 @@ clean: clean-patched unpatch
 clean-patched:
 	dh_testdir
 	dh_testroot
-	rm -f build-*-stamp
 
 	-$(MAKE) distclean
 	-rm -rf install* busybox.1
@@ -107,9 +106,6 @@ install: build-arch
 		find . \( -type f -o -type l \) -exec cp -a {} $(CURDIR)/debian/$$i/{} \;; \
 	); \
 	done
-
-	#install -m644 debian/$(PACKAGE_PREFIX)-static.override \
-	#	debian/$(PACKAGE_PREFIX)-static/usr/share/lintian/overrides/$(PACKAGE_PREFIX)-static
 
 # Build architecture-dependent files here.
 binary-arch: build-arch install

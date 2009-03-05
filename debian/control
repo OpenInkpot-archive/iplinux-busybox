@@ -1,10 +1,10 @@
 Source: busybox
-Priority: required
-Maintainer: Alexander Shishkin <virtuoso@slind.org>
-Build-Depends: debhelper (>= 4.2.0), quilt
 Section: core
-XCS-Cross-Host-Build-Depends: debhelper (>= 4.2.0), quilt
-Standards-Version: 3.6.1
+Priority: required
+Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
+Build-Depends: debhelper (>= 7), quilt
+XCS-Cross-Host-Build-Depends: debhelper (>= 7), quilt
+Standards-Version: 3.8.0
 
 Package: busybox
 Architecture: any
@@ -12,7 +12,6 @@ Depends: ${shlibs:Depends}
 Conflicts: adduser, awk, bsdutils, busybox-static, coreutils, dash, hostname, iputils-ping, login, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, procps, psmisc, sed, sysvinit, tar, tftp, tftp-hpa, wget
 Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-tar, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
 Replaces: busybox-static, busybox-tiny, busybox-heavy
-Section: core
 Description: Tiny utilities for small and embedded systems
  BusyBox combines tiny versions of many common UNIX utilities into a single
  small executable. It provides minimalist replacements for the most common
@@ -28,7 +27,6 @@ Depends: ${shlibs:Depends}
 Conflicts: adduser, awk, bsdutils, busybox, coreutils, dash, dpkg, hostname, iputils-ping, login, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, procps, psmisc, sed, sysvinit, tar, tftp, tftp-hpa, wget
 Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-dpkg, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-tar, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
 Replaces: busybox, busybox-tiny, busybox-heavy
-Section: core
 Description: Tiny utilities for small and embedded systems
  BusyBox combines tiny versions of many common UNIX utilities into a single
  small executable. It provides minimalist replacements for the most common
@@ -48,7 +46,6 @@ Description: Tiny utilities for small and embedded systems
 # Conflicts: adduser, awk, bsdutils, busybox-static, coreutils, dash, hostname, iputils-ping, login, mini-findutils, mini-util-linux, ncurses-bin, net-tools, passwd, psmisc, sed, sysvinit, tar
 # Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-passwd, slind-virtual-ping, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-util-linux, slind-virtual-tar
 # Replaces: busybox, busybox-static, busybox-heavy
-# Section: core
 # Description: Tiny utilities for small and embedded systems
 #  BusyBox combines tiny versions of many common UNIX utilities into a single
 #  small executable. It provides minimalist replacements for the most common
@@ -64,7 +61,6 @@ Description: Tiny utilities for small and embedded systems
 # Conflicts: adduser, ar, awk, bsdutils, busybox-static, coreutils, cpio, dash, diff, hostname, ip, iputils-ping, login, fbset, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, patch, procps, psmisc, sed, sharutils, sysvinit, tar, telnet, tftp, tftp-hpa, wget, udhcpc
 # Provides: awk, slind-virtual-adduser, slind-virtual-ar, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-cpio, slind-virtual-debianutils, slind-virtual-dhcpc, slind-virtual-diff, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-fbset, slind-virtual-ip, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-patch, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-sharutils, slind-virtual-shell, slind-virtual-tar, slind-virtual-telnet, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
 # Replaces: busybox-static, busybox-tiny, busybox
-# Section: core
 # Description: Tiny utilities for small and embedded systems
 #  BusyBox combines tiny versions of many common UNIX utilities into a single
 #  small executable. It provides minimalist replacements for the most common
@@ -77,7 +73,6 @@ Description: Tiny utilities for small and embedded systems
 Package: mdev
 Architecture: all
 Depends: busybox | busybox-heavy | busybox-static
-Section: core
 Description: small /dev manager
  mdev is /dev manager for small devices.
  .
