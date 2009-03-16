@@ -1,3 +1,9 @@
+busybox (1:1.12.0-1.ip2) asimov; urgency=low
+
+  * CONFIG_FEATURE_MDEV_LOAD_FIRMWARE=y
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Mon, 16 Mar 2009 20:06:02 +0600
+
 busybox (1:1.12.0-1.ip1) asimov; urgency=low
 
   * Build for IPlinux.
