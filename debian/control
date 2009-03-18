@@ -76,4 +76,14 @@ Depends: busybox | busybox-heavy | busybox-static
 Description: small /dev manager
  mdev is /dev manager for small devices.
  .
- This package relies on busybox to provide actual /sbin/mdev and just contains initscript.
+ This package relies on busybox to provide actual /sbin/mdev and just contains
+ initscript.
+
+Package: hwclock
+Architecture: all
+Depends: busybox | busybox-heavy | busybox-static
+Description: hardware clock initialization
+ Setting the hardware clock on startup and saving it on shutdown.
+ .
+ This package relies on busybox to provide actual /sbin/hwclock and just
+ contains the initscript.

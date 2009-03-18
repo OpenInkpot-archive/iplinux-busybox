@@ -67,8 +67,7 @@ build-arch-deb-%-stamp:
 	install busybox install-$$CURVAR/bin/busybox && \
 	$(MAKE) CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- PREFIX=$(CURDIR)/install-$$CURVAR install && \
 	install -m 644 debian/inittab $(CURDIR)/install-$$CURVAR/etc/inittab && \
-	install -m 755 debian/modules $(CURDIR)/install-$$CURVAR/etc/init.d/modules && \
-	install -m 755 debian/hwclock $(CURDIR)/install-$(PACKAGE_PREFIX)/etc/init.d/hwclock
+	install -m 755 debian/modules $(CURDIR)/install-$$CURVAR/etc/init.d/modules
 
 	touch $@
 
