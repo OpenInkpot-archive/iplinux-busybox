@@ -1,8 +1,8 @@
-Index: busybox/include/applets.h
-===================================================================
---- busybox.orig/include/applets.h	2008-09-06 13:09:31.000000000 +0700
-+++ busybox/include/applets.h	2008-09-06 13:10:05.000000000 +0700
-@@ -139,6 +139,7 @@
+diff --git a/include/applets.h b/include/applets.h
+index 46135dc..4a7a3b1 100644
+--- a/include/applets.h
++++ b/include/applets.h
+@@ -139,6 +139,7 @@ USE_EJECT(APPLET(eject, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
  USE_ENV(APPLET(env, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
  USE_ENVDIR(APPLET_ODDNAME(envdir, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envdir))
  USE_ENVUIDGID(APPLET_ODDNAME(envuidgid, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envuidgid))
@@ -10,10 +10,10 @@ Index: busybox/include/applets.h
  USE_ETHER_WAKE(APPLET_ODDNAME(ether-wake, ether_wake, _BB_DIR_USR_BIN, _BB_SUID_NEVER, ether_wake))
  USE_EXPAND(APPLET(expand, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
  USE_EXPR(APPLET(expr, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
-Index: busybox/include/usage.h
-===================================================================
---- busybox.orig/include/usage.h	2008-09-06 13:09:31.000000000 +0700
-+++ busybox/include/usage.h	2008-09-06 13:10:05.000000000 +0700
+diff --git a/include/usage.h b/include/usage.h
+index 57a9f99..632598f 100644
+--- a/include/usage.h
++++ b/include/usage.h
 @@ -127,6 +127,19 @@
         "$ basename /foo/bar.txt .txt\n" \
         "bar"
@@ -43,11 +43,11 @@ Index: busybox/include/usage.h
         "COMMAND [BRIDGE [INTERFACE]]"
  #define brctl_full_usage "\n\n" \
         "Manage ethernet bridges.\n" \
-Index: busybox/miscutils/Config.in
-===================================================================
---- busybox.orig/miscutils/Config.in	2008-09-06 13:09:31.000000000 +0700
-+++ busybox/miscutils/Config.in	2008-09-06 13:10:05.000000000 +0700
-@@ -202,6 +202,25 @@
+diff --git a/miscutils/Config.in b/miscutils/Config.in
+index 0c80ae6..ca9d811 100644
+--- a/miscutils/Config.in
++++ b/miscutils/Config.in
+@@ -202,6 +202,25 @@ config FEATURE_EJECT_SCSI
  	  Add the -s option to eject, this allows to eject SCSI-Devices and
  	  usb-storage devices.
  
@@ -73,11 +73,24 @@ Index: busybox/miscutils/Config.in
  config FBSPLASH
  	bool "fbsplash"
  	default n
-Index: busybox/miscutils/esplash.c
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ busybox/miscutils/esplash.c	2008-09-06 13:10:05.000000000 +0700
-@@ -0,0 +1,221 @@
+diff --git a/miscutils/Kbuild b/miscutils/Kbuild
+index c12b12d..f43e074 100644
+--- a/miscutils/Kbuild
++++ b/miscutils/Kbuild
+@@ -14,6 +14,7 @@ lib-$(CONFIG_CRONTAB)     += crontab.o
+ lib-$(CONFIG_DC)          += dc.o
+ lib-$(CONFIG_DEVFSD)      += devfsd.o
+ lib-$(CONFIG_EJECT)       += eject.o
++lib-$(CONFIG_ESPLASH)     += esplash.o
+ lib-$(CONFIG_FBSPLASH)    += fbsplash.o
+ lib-$(CONFIG_HDPARM)      += hdparm.o
+ lib-$(CONFIG_INOTIFYD)    += inotifyd.o
+diff --git a/miscutils/esplash.c b/miscutils/esplash.c
+new file mode 100644
+index 0000000..087a2fa
+--- /dev/null
++++ b/miscutils/esplash.c
+@@ -0,0 +1,232 @@
 +/* vi: set sw=4 ts=4: */
 +/*
 + * Copyright (C) 2008 Mikhail Gusarov <dottedmag@dottedmag.net>
@@ -110,6 +123,7 @@ Index: busybox/miscutils/esplash.c
 +	unsigned ns[CONFIG_OPTIONS];	// n-parameters
 +	unsigned last_percent;	// boot percent displayed last time
 +	const char *image_filename;
++	const char *fb_device;
 +	struct fb_var_screeninfo scr_var;
 +	struct fb_fix_screeninfo scr_fix;
 +};
@@ -157,8 +171,8 @@ Index: busybox/miscutils/esplash.c
 +static void fb_drawprogressbar(unsigned percent)
 +{
 +	// [from_x, to_x)
-+	int from_x = G.nbar_width * G.last_percent / 100;
-+	int to_x = G.nbar_width * percent / 100;
++	int from_x = G.nbar_posx + G.nbar_width * G.last_percent / 100;
++	int to_x = G.nbar_posx + G.nbar_width * percent / 100;
 +
 +	// [from_y, to_y)
 +	int from_y = G.nbar_posy;
@@ -209,18 +223,25 @@ Index: busybox/miscutils/esplash.c
 +	static const char const param_names[] ALIGN1 =
 +		"BAR_WIDTH\0" "BAR_HEIGHT\0"
 +		"BAR_LEFT\0" "BAR_TOP\0"
-+		"BAR_COLOR\0"
++		"BAR_COLOR\0" "IMAGE\0" "FB\0"
 +		;
 +	char *token[2];
 +	parser_t *parser = config_open2(cfg_filename, xfopen_stdin);
 +	while (config_read(parser, token, 2, 2, "#=",
 +				    (PARSE_NORMAL | PARSE_MIN_DIE) & ~(PARSE_TRIM | PARSE_COLLAPSE))) {
-+		unsigned val = xatoi_u(token[1]);
 +		int i = index_in_strings(param_names, token[0]);
 +		if (i < 0)
 +			bb_error_msg_and_die("syntax error: '%s'", token[0]);
-+		if (i >= 0 && i < CONFIG_OPTIONS)
++		if (i >= 0 && i < CONFIG_OPTIONS) {
++			unsigned val = xatoi_u(token[1]);
 +			G.ns[i] = val;
++		} else if(i == 5) {
++			if(G.image_filename == NULL || G.image_filename[0] == '\0')
++				G.image_filename = strdup(token[1]);
++		} else if(i == 6) {
++			if(G.fb_device == NULL || G.fb_device[0] == '\0')
++				G.fb_device = strdup(token[1]);
++		}
 +	}
 +	config_close(parser);
 +}
@@ -229,7 +250,7 @@ Index: busybox/miscutils/esplash.c
 +int esplash_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 +int esplash_main(int argc UNUSED_PARAM, char **argv)
 +{
-+	const char *fb_device, *cfg_filename, *fifo_filename;
++	const char *cfg_filename, *fifo_filename;
 +	FILE *fp = fp; // for compiler
 +	char *num_buf;
 +	unsigned num;
@@ -238,11 +259,11 @@ Index: busybox/miscutils/esplash.c
 +	INIT_G();
 +
 +	// parse command line options
-+	fb_device = "/dev/fb0";
 +	cfg_filename = NULL;
 +	fifo_filename = NULL;
++
 +	bCursorOff = 1 & getopt32(argv, "cs:d:i:f:",
-+			&G.image_filename, &fb_device, &cfg_filename, &fifo_filename);
++			&G.image_filename, &G.fb_device, &cfg_filename, &fifo_filename);
 +
 +	// parse configuration file
 +	if (cfg_filename)
@@ -257,7 +278,10 @@ Index: busybox/miscutils/esplash.c
 +		full_write(STDOUT_FILENO, "\x1b" "[?25l", 6);
 +	}
 +
-+	fb_open(fb_device);
++	if(G.fb_device == NULL || G.fb_device[0] == '\0')
++		G.fb_device = "/dev/fb0";
++
++	fb_open(G.fb_device);
 +
 +	if (!fifo_filename)
 +		return EXIT_SUCCESS;
@@ -299,10 +323,11 @@ Index: busybox/miscutils/esplash.c
 +
 +	return EXIT_SUCCESS;
 +}
-Index: busybox/miscutils/esplash.cfg
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ busybox/miscutils/esplash.cfg	2008-09-06 13:10:05.000000000 +0700
+diff --git a/miscutils/esplash.cfg b/miscutils/esplash.cfg
+new file mode 100644
+index 0000000..b6cf607
+--- /dev/null
++++ b/miscutils/esplash.cfg
 @@ -0,0 +1,9 @@
 +# progress bar position
 +BAR_LEFT=170
@@ -313,15 +338,3 @@ Index: busybox/miscutils/esplash.cfg
 +BAR_R=80
 +BAR_G=80
 +BAR_B=130
-Index: busybox/miscutils/Kbuild
-===================================================================
---- busybox.orig/miscutils/Kbuild	2008-09-06 13:09:31.000000000 +0700
-+++ busybox/miscutils/Kbuild	2008-09-06 13:10:05.000000000 +0700
-@@ -14,6 +14,7 @@
- lib-$(CONFIG_DC)          += dc.o
- lib-$(CONFIG_DEVFSD)      += devfsd.o
- lib-$(CONFIG_EJECT)       += eject.o
-+lib-$(CONFIG_ESPLASH)     += esplash.o
- lib-$(CONFIG_FBSPLASH)    += fbsplash.o
- lib-$(CONFIG_HDPARM)      += hdparm.o
- lib-$(CONFIG_INOTIFYD)    += inotifyd.o
