@@ -1,3 +1,10 @@
+busybox (1:1.12.0-3) asimov; urgency=low
+
+  [Alexander Kerner]
+  * image location and framebuffer device made configurable.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 10 Apr 2009 15:37:32 +0700
+
 busybox (1:1.12.0-2+b1) asimov; urgency=low
 
   * Rebuild for new toolchain.
