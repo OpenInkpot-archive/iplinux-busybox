@@ -87,10 +87,10 @@ index c12b12d..f43e074 100644
  lib-$(CONFIG_INOTIFYD)    += inotifyd.o
 diff --git a/miscutils/esplash.c b/miscutils/esplash.c
 new file mode 100644
-index 0000000..087a2fa
+index 0000000..538654e
 --- /dev/null
 +++ b/miscutils/esplash.c
-@@ -0,0 +1,232 @@
+@@ -0,0 +1,288 @@
 +/* vi: set sw=4 ts=4: */
 +/*
 + * Copyright (C) 2008 Mikhail Gusarov <dottedmag@dottedmag.net>
@@ -116,7 +116,7 @@ index 0000000..087a2fa
 +#include "libbb.h"
 +#include <linux/fb.h>
 +
-+#define CONFIG_OPTIONS 5
++#define CONFIG_OPTIONS 6
 +
 +struct globals {
 +	unsigned char *addr;	// pointer to framebuffer memory
@@ -137,6 +137,7 @@ index 0000000..087a2fa
 +#define nbar_posx	ns[2]	// progress bar horizontal position
 +#define nbar_posy	ns[3]	// progress bar vertical position
 +#define nbar_col	ns[4]	// progress bar color
++#define screen_orientation	ns[5]	// screen orientation
 +
 +/**
 + * Draw filled rectangle on framebuffer
@@ -170,6 +171,8 @@ index 0000000..087a2fa
 + */
 +static void fb_drawprogressbar(unsigned percent)
 +{
++	int x, x2;
++
 +	// [from_x, to_x)
 +	int from_x = G.nbar_posx + G.nbar_width * G.last_percent / 100;
 +	int to_x = G.nbar_posx + G.nbar_width * percent / 100;
@@ -180,6 +183,23 @@ index 0000000..087a2fa
 +
 +	if(percent <= G.last_percent)
 +		return;
++
++	switch(G.screen_orientation) {
++		case 90:
++			// not implemented
++			break;
++		case 180:
++			// not implemented
++			break;
++		case 270:
++			x = from_x;
++			x2 = to_x;
++			from_x = G.scr_var.xres - to_y;
++			to_x = G.scr_var.xres - from_y;
++			from_y = x;
++			to_y = x2;
++			break;
++	}
 +
 +	fb_drawfullrectangle(from_x, from_y, to_x, to_y, G.nbar_col);
 +
@@ -192,26 +212,61 @@ index 0000000..087a2fa
 + */
 +static void fb_open(const char *strfb_device)
 +{
++	char *buffer, *p;
++	int fb_size, cnt;
++
 +	int fbfd = xopen(strfb_device, O_RDWR);
 +	int themefd = open_zipped(G.image_filename);
 +
 +	// framebuffer properties
 +	xioctl(fbfd, FBIOGET_VSCREENINFO, &G.scr_var);
 +	xioctl(fbfd, FBIOGET_FSCREENINFO, &G.scr_fix);
++	fb_size = G.scr_var.xres * G.scr_var.yres;
 +
 +	if (G.scr_var.bits_per_pixel != 8)
 +		bb_error_msg_and_die("only 8 bpp is supported");
 +
-+	bb_copyfd_size(themefd, fbfd, G.scr_var.xres * G.scr_var.yres);
-+	close(themefd);
-+
 +	// map the device in memory
 +	G.addr = mmap(NULL,
-+			G.scr_var.xres * G.scr_var.yres,
++			fb_size,
 +			PROT_WRITE, MAP_SHARED, fbfd, 0);
 +	if (G.addr == MAP_FAILED)
 +		bb_perror_msg_and_die("can't mmap %s", strfb_device);
 +	close(fbfd);
++
++	buffer = mmap(NULL, fb_size,
++			PROT_READ | PROT_WRITE,
++			MAP_PRIVATE | MAP_ANON,
++			/* ignored: */ -1, 0);
++	if (buffer == MAP_FAILED)
++		buffer = alloca(fb_size);
++
++	p = buffer;
++	cnt = 0;
++	while(1) {
++		ssize_t rd;
++
++		rd = safe_read(themefd, p, (fb_size - cnt) > 4096 ? 4096 : (fb_size - cnt));
++
++		if(rd > 0) {
++			p += rd;
++			cnt += rd;
++		}
++
++		if(fb_size == cnt) {
++			memcpy(G.addr, buffer, fb_size);
++
++			p = buffer;
++			cnt = 0;
++		}
++
++		if(rd <= 0)
++			break;
++	}
++
++	munmap(buffer, fb_size);
++
++	close(themefd);
 +}
 +
 +/**
@@ -223,7 +278,8 @@ index 0000000..087a2fa
 +	static const char const param_names[] ALIGN1 =
 +		"BAR_WIDTH\0" "BAR_HEIGHT\0"
 +		"BAR_LEFT\0" "BAR_TOP\0"
-+		"BAR_COLOR\0" "IMAGE\0" "FB\0"
++		"BAR_COLOR\0" "SCREEN_ORIENTATION\0"
++		"IMAGE\0" "FB\0"
 +		;
 +	char *token[2];
 +	parser_t *parser = config_open2(cfg_filename, xfopen_stdin);
@@ -235,10 +291,10 @@ index 0000000..087a2fa
 +		if (i >= 0 && i < CONFIG_OPTIONS) {
 +			unsigned val = xatoi_u(token[1]);
 +			G.ns[i] = val;
-+		} else if(i == 5) {
++		} else if(i == 6) {
 +			if(G.image_filename == NULL || G.image_filename[0] == '\0')
 +				G.image_filename = strdup(token[1]);
-+		} else if(i == 6) {
++		} else if(i == 7) {
 +			if(G.fb_device == NULL || G.fb_device[0] == '\0')
 +				G.fb_device = strdup(token[1]);
 +		}
