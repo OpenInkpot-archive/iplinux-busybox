@@ -1,3 +1,10 @@
+busybox (1:1.12.0-4) asimov; urgency=low
+
+  * esplash: progress bar support for rotated screens
+  * esplash: write the whole image into a framebuffer at once
+
+ -- Alexander Kerner <lunohod@openinkpot.org>  Mon, 13 Apr 2009 10:53:20 +0200
+
 busybox (1:1.12.0-3) asimov; urgency=low
 
   [Alexander Kerner]
