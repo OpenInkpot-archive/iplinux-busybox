@@ -1,8 +1,8 @@
-diff --git a/include/applets.h b/include/applets.h
-index 46135dc..4a7a3b1 100644
---- a/include/applets.h
-+++ b/include/applets.h
-@@ -139,6 +139,7 @@ USE_EJECT(APPLET(eject, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
+Index: busybox/include/applets.h
+===================================================================
+--- busybox.orig/include/applets.h	2009-05-17 20:06:17.000000000 +0700
++++ busybox/include/applets.h	2009-05-17 20:07:10.000000000 +0700
+@@ -139,6 +139,7 @@
  USE_ENV(APPLET(env, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
  USE_ENVDIR(APPLET_ODDNAME(envdir, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envdir))
  USE_ENVUIDGID(APPLET_ODDNAME(envuidgid, chpst, _BB_DIR_USR_BIN, _BB_SUID_NEVER, envuidgid))
@@ -10,10 +10,10 @@ index 46135dc..4a7a3b1 100644
  USE_ETHER_WAKE(APPLET_ODDNAME(ether-wake, ether_wake, _BB_DIR_USR_BIN, _BB_SUID_NEVER, ether_wake))
  USE_EXPAND(APPLET(expand, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
  USE_EXPR(APPLET(expr, _BB_DIR_USR_BIN, _BB_SUID_NEVER))
-diff --git a/include/usage.h b/include/usage.h
-index 57a9f99..632598f 100644
---- a/include/usage.h
-+++ b/include/usage.h
+Index: busybox/include/usage.h
+===================================================================
+--- busybox.orig/include/usage.h	2009-05-17 20:06:17.000000000 +0700
++++ busybox/include/usage.h	2009-05-17 20:07:10.000000000 +0700
 @@ -127,6 +127,19 @@
         "$ basename /foo/bar.txt .txt\n" \
         "bar"
@@ -43,11 +43,11 @@ index 57a9f99..632598f 100644
         "COMMAND [BRIDGE [INTERFACE]]"
  #define brctl_full_usage "\n\n" \
         "Manage ethernet bridges.\n" \
-diff --git a/miscutils/Config.in b/miscutils/Config.in
-index 0c80ae6..ca9d811 100644
---- a/miscutils/Config.in
-+++ b/miscutils/Config.in
-@@ -202,6 +202,25 @@ config FEATURE_EJECT_SCSI
+Index: busybox/miscutils/Config.in
+===================================================================
+--- busybox.orig/miscutils/Config.in	2009-05-17 20:06:17.000000000 +0700
++++ busybox/miscutils/Config.in	2009-05-17 20:07:10.000000000 +0700
+@@ -202,6 +202,25 @@
  	  Add the -s option to eject, this allows to eject SCSI-Devices and
  	  usb-storage devices.
  
@@ -73,11 +73,11 @@ index 0c80ae6..ca9d811 100644
  config FBSPLASH
  	bool "fbsplash"
  	default n
-diff --git a/miscutils/Kbuild b/miscutils/Kbuild
-index c12b12d..f43e074 100644
---- a/miscutils/Kbuild
-+++ b/miscutils/Kbuild
-@@ -14,6 +14,7 @@ lib-$(CONFIG_CRONTAB)     += crontab.o
+Index: busybox/miscutils/Kbuild
+===================================================================
+--- busybox.orig/miscutils/Kbuild	2009-05-17 20:06:17.000000000 +0700
++++ busybox/miscutils/Kbuild	2009-05-17 20:07:10.000000000 +0700
+@@ -14,6 +14,7 @@
  lib-$(CONFIG_DC)          += dc.o
  lib-$(CONFIG_DEVFSD)      += devfsd.o
  lib-$(CONFIG_EJECT)       += eject.o
@@ -85,12 +85,11 @@ index c12b12d..f43e074 100644
  lib-$(CONFIG_FBSPLASH)    += fbsplash.o
  lib-$(CONFIG_HDPARM)      += hdparm.o
  lib-$(CONFIG_INOTIFYD)    += inotifyd.o
-diff --git a/miscutils/esplash.c b/miscutils/esplash.c
-new file mode 100644
-index 0000000..538654e
---- /dev/null
-+++ b/miscutils/esplash.c
-@@ -0,0 +1,288 @@
+Index: busybox/miscutils/esplash.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ busybox/miscutils/esplash.c	2009-05-17 20:10:04.000000000 +0700
+@@ -0,0 +1,285 @@
 +/* vi: set sw=4 ts=4: */
 +/*
 + * Copyright (C) 2008 Mikhail Gusarov <dottedmag@dottedmag.net>
@@ -212,11 +211,9 @@ index 0000000..538654e
 + */
 +static void fb_open(const char *strfb_device)
 +{
-+	char *buffer, *p;
-+	int fb_size, cnt;
++	int fb_size;
 +
 +	int fbfd = xopen(strfb_device, O_RDWR);
-+	int themefd = open_zipped(G.image_filename);
 +
 +	// framebuffer properties
 +	xioctl(fbfd, FBIOGET_VSCREENINFO, &G.scr_var);
@@ -234,39 +231,42 @@ index 0000000..538654e
 +		bb_perror_msg_and_die("can't mmap %s", strfb_device);
 +	close(fbfd);
 +
-+	buffer = mmap(NULL, fb_size,
-+			PROT_READ | PROT_WRITE,
-+			MAP_PRIVATE | MAP_ANON,
-+			/* ignored: */ -1, 0);
-+	if (buffer == MAP_FAILED)
-+		buffer = alloca(fb_size);
++    if(G.image_filename) {
++        int themefd = open_zipped(G.image_filename);
 +
-+	p = buffer;
-+	cnt = 0;
-+	while(1) {
-+		ssize_t rd;
++        char *buffer = mmap(NULL, fb_size,
++                      PROT_READ | PROT_WRITE,
++                      MAP_PRIVATE | MAP_ANON,
++                      /* ignored: */ -1, 0);
++        if (buffer == MAP_FAILED)
++            buffer = alloca(fb_size);
 +
-+		rd = safe_read(themefd, p, (fb_size - cnt) > 4096 ? 4096 : (fb_size - cnt));
++        char *p = buffer;
++        int cnt = 0;
++        while(1) {
++            ssize_t rd;
 +
-+		if(rd > 0) {
-+			p += rd;
-+			cnt += rd;
-+		}
++            rd = safe_read(themefd, p, (fb_size - cnt) > 4096 ? 4096 : (fb_size - cnt));
 +
-+		if(fb_size == cnt) {
-+			memcpy(G.addr, buffer, fb_size);
++            if(rd > 0) {
++                p += rd;
++                cnt += rd;
++            }
 +
-+			p = buffer;
-+			cnt = 0;
-+		}
++            if(fb_size == cnt) {
++                memcpy(G.addr, buffer, fb_size);
 +
-+		if(rd <= 0)
-+			break;
-+	}
++                p = buffer;
++                cnt = 0;
++            }
 +
-+	munmap(buffer, fb_size);
++            if(rd <= 0)
++                break;
++        }
 +
-+	close(themefd);
++        munmap(buffer, fb_size);
++        close(themefd);
++    }
 +}
 +
 +/**
@@ -325,10 +325,6 @@ index 0000000..538654e
 +	if (cfg_filename)
 +		init(cfg_filename);
 +
-+	// We must have -s IMG
-+	if (!G.image_filename)
-+		bb_show_usage();
-+
 +	if (fifo_filename && bCursorOff) {
 +		// hide cursor (BEFORE any fb ops)
 +		full_write(STDOUT_FILENO, "\x1b" "[?25l", 6);
@@ -379,11 +375,10 @@ index 0000000..538654e
 +
 +	return EXIT_SUCCESS;
 +}
-diff --git a/miscutils/esplash.cfg b/miscutils/esplash.cfg
-new file mode 100644
-index 0000000..b6cf607
---- /dev/null
-+++ b/miscutils/esplash.cfg
+Index: busybox/miscutils/esplash.cfg
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ busybox/miscutils/esplash.cfg	2009-05-17 20:07:10.000000000 +0700
 @@ -0,0 +1,9 @@
 +# progress bar position
 +BAR_LEFT=170
