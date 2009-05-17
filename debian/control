@@ -1,7 +1,7 @@
 Source: busybox
 Section: core
 Priority: required
-Maintainer: Alexander Kerner <lunohod@openinkpot.org>
+Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
 Build-Depends: debhelper (>= 7), quilt
 XCS-Cross-Host-Build-Depends: debhelper (>= 7), quilt
 Standards-Version: 3.8.0

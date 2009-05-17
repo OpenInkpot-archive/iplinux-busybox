@@ -1,3 +1,10 @@
+busybox (1:1.12.0-5) asimov; urgency=low
+
+  * esplash: image file is no longer mandatory (e.g. if bootloader has
+    already initialized framebuffer)
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sun, 17 May 2009 20:11:11 +0700
+
 busybox (1:1.12.0-4) asimov; urgency=low
 
   * esplash: progress bar support for rotated screens
