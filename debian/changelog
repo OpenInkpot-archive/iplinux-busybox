@@ -1,3 +1,13 @@
+busybox (1:1.12.0-7) asimov; urgency=low
+
+  * esplash
+    - de-quiltified
+    - added daemonization support
+    - silenced compiler warnings
+    - updated "usage" text
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 21 May 2009 23:04:23 +0700
+
 busybox (1:1.12.0-6) asimov; urgency=low
 
   * Added killall5(8), needed by /etc/init.d/sendsigs
