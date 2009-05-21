@@ -10,11 +10,6 @@
  * Usage:
  * - put somewhere esplash.cfg file and an image (fb dump, possibly compressed).
  * - run applet: $ setsid esplash [params] &
- *      -c: hide cursor
- *      -d /dev/fbN: framebuffer device (if not /dev/fb0)
- *      -s path_to_image_file
- *      -i path_to_cfg_file
- *      -f path_to_fifo (can be "-" for stdin)
  * - commands for fifo:
  *   "NN" (ASCII decimal number) - percentage to show on progress bar.
  *   "exit" (or just close fifo) - well you guessed it.

@@ -128,15 +128,16 @@
        "bar"
 
 #define esplash_trivial_usage \
-       "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
+       "[-b] [-c] [-s IMG] [-d FB] [-i CONFIG] [-f FIFO]"
 #define esplash_full_usage "\n\n" \
        "Options:\n" \
-     "\n	-s	Image" \
+     "\n	-b	Fork into background" \
      "\n	-c	Hide cursor" \
+     "\n	-s	Image file (raw framebuffer data)" \
      "\n	-d	Framebuffer device (default /dev/fb0)" \
      "\n	-i	Config file (var=value):" \
      "\n			BAR_LEFT,BAR_TOP,BAR_WIDTH,BAR_HEIGHT" \
-     "\n			BAR_COLOR" \
+     "\n			BAR_COLOR,SCREN_ORIENTATION,IMAGE,FB" \
      "\n	-f	Control pipe (else exit after drawing image)" \
      "\n			commands: 'NN' (% for progress bar) or 'exit'" \
 
