@@ -127,6 +127,19 @@
        "$ basename /foo/bar.txt .txt\n" \
        "bar"
 
+#define esplash_trivial_usage \
+       "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
+#define esplash_full_usage "\n\n" \
+       "Options:\n" \
+     "\n	-s	Image" \
+     "\n	-c	Hide cursor" \
+     "\n	-d	Framebuffer device (default /dev/fb0)" \
+     "\n	-i	Config file (var=value):" \
+     "\n			BAR_LEFT,BAR_TOP,BAR_WIDTH,BAR_HEIGHT" \
+     "\n			BAR_COLOR" \
+     "\n	-f	Control pipe (else exit after drawing image)" \
+     "\n			commands: 'NN' (% for progress bar) or 'exit'" \
+
 #define fbsplash_trivial_usage \
        "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
 #define fbsplash_full_usage "\n\n" \
@@ -140,7 +153,7 @@
      "\n	-f	Control pipe (else exit after drawing image)" \
      "\n			commands: 'NN' (% for progress bar) or 'exit'" \
 
-#define brctl_trivial_usage \
+#define brctl_trivial_usage                     \
        "COMMAND [BRIDGE [INTERFACE]]"
 #define brctl_full_usage "\n\n" \
        "Manage ethernet bridges.\n" \

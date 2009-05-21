@@ -202,6 +202,25 @@ config FEATURE_EJECT_SCSI
 	  Add the -s option to eject, this allows to eject SCSI-Devices and
 	  usb-storage devices.
 
+config ESPLASH
+	bool "esplash"
+	default n
+	help
+	  Shows splash image and progress bar on 8bpp framebuffer device.
+	  Can be used during boot phase of an embedded device. ~2kb.
+	  Usage:
+	  - put somewhere esplash.cfg file and an image in framebuffer's format
+	    (possibly compressed: .gz, .bz2 and .lzma are recognized)
+	  - $ setsid esplash [params] &
+	    -c: hide cursor
+	    -d /dev/fbN: framebuffer device (if not /dev/fb0)
+	    -s path_to_image_file
+	    -i path_to_cfg_file (can be "-" for stdin)
+	    -f path_to_fifo (can be "-" for stdin)
+	  - commands for fifo:
+	    "NN" (ASCII decimal number) - percentage to show on progress bar
+	    "exit" - well you guessed it
+
 config FBSPLASH
 	bool "fbsplash"
 	default n

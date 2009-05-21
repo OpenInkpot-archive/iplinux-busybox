@@ -14,6 +14,7 @@ lib-$(CONFIG_CRONTAB)     += crontab.o
 lib-$(CONFIG_DC)          += dc.o
 lib-$(CONFIG_DEVFSD)      += devfsd.o
 lib-$(CONFIG_EJECT)       += eject.o
+lib-$(CONFIG_ESPLASH)     += esplash.o
 lib-$(CONFIG_FBSPLASH)    += fbsplash.o
 lib-$(CONFIG_HDPARM)      += hdparm.o
 lib-$(CONFIG_INOTIFYD)    += inotifyd.o

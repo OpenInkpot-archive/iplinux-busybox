@@ -2,8 +2,8 @@ Source: busybox
 Section: core
 Priority: required
 Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
-Build-Depends: debhelper (>= 7), quilt
-XCS-Cross-Host-Build-Depends: debhelper (>= 7), quilt
+Build-Depends: debhelper (>= 7)
+XCS-Cross-Host-Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.0
 
 Package: busybox
