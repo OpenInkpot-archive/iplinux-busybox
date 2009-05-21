@@ -138,8 +138,9 @@ static bool fb_open(const char *strfb_device)
 	close(fbfd);
 
     if(G.image_filename) {
+        char *p;
+        int cnt;
         int themefd = open_zipped(G.image_filename);
-
         char *buffer = mmap(NULL, fb_size,
                       PROT_READ | PROT_WRITE,
                       MAP_PRIVATE | MAP_ANON,
@@ -147,8 +148,8 @@ static bool fb_open(const char *strfb_device)
         if (buffer == MAP_FAILED)
             buffer = alloca(fb_size);
 
-        char *p = buffer;
-        int cnt = 0;
+        p = buffer;
+        cnt = 0;
         while(1) {
             ssize_t rd;
 
