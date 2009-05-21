@@ -117,11 +117,14 @@ static void fb_drawprogressbar(unsigned percent)
  *	Open and initialize the framebuffer device
  * \param *strfb_device pointer to framebuffer device
  */
-static void fb_open(const char *strfb_device)
+static bool fb_open(const char *strfb_device)
 {
 	int fb_size;
 
 	int fbfd = xopen(strfb_device, O_RDWR);
+
+	if(fbfd == -1)
+		return false;
 
 	// framebuffer properties
 	xioctl(fbfd, FBIOGET_VSCREENINFO, &G.scr_var);
@@ -175,6 +178,8 @@ static void fb_open(const char *strfb_device)
         munmap(buffer, fb_size);
         close(themefd);
     }
+
+    return true;
 }
 
 /**
@@ -218,7 +223,8 @@ int esplash_main(int argc UNUSED_PARAM, char **argv)
 	FILE *fp = fp; // for compiler
 	char *num_buf;
 	unsigned num;
-	bool bCursorOff;
+	bool bCursorOff, background;
+	int opts;
 
 	INIT_G();
 
@@ -226,8 +232,10 @@ int esplash_main(int argc UNUSED_PARAM, char **argv)
 	cfg_filename = NULL;
 	fifo_filename = NULL;
 
-	bCursorOff = 1 & getopt32(argv, "cs:d:i:f:",
-			&G.image_filename, &G.fb_device, &cfg_filename, &fifo_filename);
+	opts = getopt32(argv, "bcs:d:i:f:",
+	                &G.image_filename, &G.fb_device, &cfg_filename, &fifo_filename);
+	background = opts & 1;
+	bCursorOff = opts & 2;
 
 	// parse configuration file
 	if (cfg_filename)
@@ -241,10 +249,13 @@ int esplash_main(int argc UNUSED_PARAM, char **argv)
 	if(G.fb_device == NULL || G.fb_device[0] == '\0')
 		G.fb_device = "/dev/fb0";
 
-	fb_open(G.fb_device);
+	if(!fb_open(G.fb_device))
+		return EXIT_FAILURE;
 
 	if (!fifo_filename)
 		return EXIT_SUCCESS;
+
+	bb_daemonize(DAEMON_CHDIR_ROOT | DAEMON_DEVNULL_STDIO);
 
 	fp = xfopen_stdin(fifo_filename);
 	if (fp != stdin) {
