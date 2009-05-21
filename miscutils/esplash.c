@@ -251,7 +251,8 @@ int esplash_main(int argc UNUSED_PARAM, char **argv)
 	if (!fifo_filename)
 		return EXIT_SUCCESS;
 
-	bb_daemonize(DAEMON_CHDIR_ROOT | DAEMON_DEVNULL_STDIO);
+    if(background)
+        bb_daemonize(DAEMON_CHDIR_ROOT | DAEMON_DEVNULL_STDIO);
 
 	fp = xfopen_stdin(fifo_filename);
 	if (fp != stdin) {
