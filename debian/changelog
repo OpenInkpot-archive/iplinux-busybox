@@ -1,3 +1,9 @@
+busybox (1:1.12.0-8) asimov; urgency=low
+
+  * Fixed behaviour of esplash -b
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 21 May 2009 23:38:27 +0700
+
 busybox (1:1.12.0-7) asimov; urgency=low
 
   * esplash
