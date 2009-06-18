@@ -42,6 +42,10 @@ mount_tmpfs() {
   ln -s /proc/kcore /dev/core
 }
 
+update_mdev_conf() {
+  cat /etc/mdev.conf.d/[0-9]* > /dev/.mdev.conf
+}
+
 unmount_tmpfs() {
   if ! umount -n -l /dev; then
     echo "Error: unable to unmount /dev."
@@ -60,6 +64,7 @@ case "$1" in
     echo > /proc/sys/kernel/hotplug
     unmount_fs_in_dev
     mount_tmpfs
+    update_mdev_conf
     mount_fs_in_dev
     echo > /dev/mdev.seq
     echo /sbin/mdev > /proc/sys/kernel/hotplug
