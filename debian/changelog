@@ -1,3 +1,10 @@
+busybox (1:1.12.0-10) asimov; urgency=low
+
+  * Added /etc/modprobe.d to list of directories created by busybox
+    package. modprobe barfs if no such dir is present.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Tue, 14 Jul 2009 17:13:54 +0700
+
 busybox (1:1.12.0-9) asimov; urgency=low
 
   * Added autogeneration of mdev.conf from /etc/mdev/mdev.conf.d/*
