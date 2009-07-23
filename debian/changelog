@@ -1,3 +1,10 @@
+busybox (1:1.12.0-11) asimov; urgency=low
+
+  * Fix /etc/init.d/modules: do not fail if one of modules can't be
+    loaded, as it can leave machine in undebuggable state.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Thu, 23 Jul 2009 15:28:05 +0700
+
 busybox (1:1.12.0-10) asimov; urgency=low
 
   * Added /etc/modprobe.d to list of directories created by busybox
