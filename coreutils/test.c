@@ -12,7 +12,7 @@
  *     modified by Herbert Xu to be used as built-in in ash.
  *     modified by Erik Andersen <andersen@codepoet.org> to be used
  *     in busybox.
- *     modified by Bernhard Fischer to be useable (i.e. a bit less bloaty).
+ *     modified by Bernhard Reutner-Fischer to be useable (i.e. a bit less bloaty).
  *
  * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
  *
@@ -571,7 +571,14 @@ static number_t nexpr(enum token n)
 
 	nest_msg(">nexpr(%s)\n", TOKSTR[n]);
 	if (n == UNOT) {
-		res = !nexpr(check_operator(*++args));
+		n = check_operator(*++args);
+		if (n == EOI) {
+			/* special case: [ ! ], [ a -a ! ] are valid */
+			/* IOW, "! ARG" may miss ARG */
+			unnest_msg("<nexpr:1 (!EOI)\n");
+			return 1;
+		}
+		res = !nexpr(n);
 		unnest_msg("<nexpr:%lld\n", res);
 		return res;
 	}
@@ -742,7 +749,7 @@ int test_main(int argc, char **argv)
 		check_operator(argv[1]);
 		if (last_operator->op_type == BINOP) {
 			/* "test [!] arg1 <binary_op> arg2" */
-			args = &argv[0];
+			args = argv;
 			res = (binop() == 0);
 			goto ret;
 		}
@@ -755,7 +762,7 @@ int test_main(int argc, char **argv)
 		argv--;
 	}
 #endif
-	args = &argv[0];
+	args = argv;
 	res = !oexpr(check_operator(*args));
 
 	if (*args != NULL && *++args != NULL) {

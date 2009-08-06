@@ -142,7 +142,8 @@ static const char *normalize(const char *arg)
  * Other settings are found in global variables.
  */
 #if !ENABLE_GETOPT_LONG
-#define generate_output(argv,argc,optstr,longopts) generate_output(argv,argc,optstr)
+#define generate_output(argv,argc,optstr,longopts) \
+	generate_output(argv,argc,optstr)
 #endif
 static int generate_output(char **argv, int argc, const char *optstr, const struct option *longopts)
 {
@@ -156,7 +157,8 @@ static int generate_output(char **argv, int argc, const char *optstr, const stru
 	if (quiet_errors) /* No error reporting from getopt(3) */
 		opterr = 0;
 
-	/* Reset getopt(3) (see libbb/getopt32.c for long rant) */
+	/* We used it already in main() in getopt32(),
+	 * we *must* reset getopt(3): */
 #ifdef __GLIBC__
 	optind = 0;
 #else /* BSD style */
