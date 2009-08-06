@@ -1,3 +1,10 @@
+busybox (1:1.14.3-1) asimov; urgency=low
+
+  * New upstream version.
+  * /etc/inittab updated to match reality
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 07 Aug 2009 04:26:55 +0700
+
 busybox (1:1.12.0-11) asimov; urgency=low
 
   * Fix /etc/init.d/modules: do not fail if one of modules can't be
