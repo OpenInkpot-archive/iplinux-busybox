@@ -1,3 +1,9 @@
+busybox (1:1.14.3-2) asimov; urgency=low
+
+  * Enable CONFIG_FEATURE_XARGS_SUPPORT_QUOTES to unbreak invoke-rc.d
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 08 Aug 2009 03:18:43 +0700
+
 busybox (1:1.14.3-1) asimov; urgency=low
 
   * New upstream version.
