@@ -1,3 +1,10 @@
+busybox (1:1.15.1-1) asimov; urgency=low
+
+  * New upstream version.
+  * hotplug handler path in mdev initscript made configurable.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 25 Sep 2009 20:49:21 +0700
+
 busybox (1:1.14.3-2) asimov; urgency=low
 
   * Enable CONFIG_FEATURE_XARGS_SUPPORT_QUOTES to unbreak invoke-rc.d
