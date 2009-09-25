@@ -1,5 +1,10 @@
 #!/bin/sh -e
 
+HOTPLUG_HANDLER=/sbin/mdev
+if [ -f /etc/default/mdev ]; then
+    . /etc/default/mdev
+fi
+
 tmpfs_size=10M
 
 unmount_fs_in_dev() {
@@ -52,7 +57,7 @@ unmount_tmpfs() {
   fi
 }
 
-[ -x /sbin/mdev ] || exit 0
+[ -x $HOTPLUG_HANDLER ] || exit 0
 
 case "$1" in
   start)
@@ -67,7 +72,7 @@ case "$1" in
     update_mdev_conf
     mount_fs_in_dev
     echo > /dev/mdev.seq
-    echo /sbin/mdev > /proc/sys/kernel/hotplug
+    echo $HOTPLUG_HANDLER > /proc/sys/kernel/hotplug
     mdev -s
     ;;
   stop)
