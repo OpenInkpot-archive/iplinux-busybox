@@ -1,3 +1,9 @@
+busybox (1:1.15.1-2) asimov; urgency=low
+
+  * Re-enable support for long options in utilities.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 26 Sep 2009 00:16:06 +0700
+
 busybox (1:1.15.1-1) asimov; urgency=low
 
   * New upstream version.
