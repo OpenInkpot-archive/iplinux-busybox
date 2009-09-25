@@ -169,7 +169,7 @@
      "\n	-f	Control pipe (else exit after drawing image)" \
      "\n			commands: 'NN' (% for progress bar) or 'exit'" \
 
-#define fbsplash_trivial_usage                          \
+#define fbsplash_trivial_usage \
        "-s IMGFILE [-c] [-d DEV] [-i INIFILE] [-f CMD]"
 #define fbsplash_full_usage "\n\n" \
        "Options:\n" \
@@ -182,7 +182,7 @@
      "\n	-f	Control pipe (else exit after drawing image)" \
      "\n			commands: 'NN' (% for progress bar) or 'exit'" \
 
-#define brctl_trivial_usage                     \
+#define brctl_trivial_usage \
        "COMMAND [BRIDGE [INTERFACE]]"
 #define brctl_full_usage "\n\n" \
        "Manage ethernet bridges.\n" \
