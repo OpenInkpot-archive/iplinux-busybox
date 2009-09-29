@@ -1,1 +1,2 @@
 debian/00header etc/mdev.conf.d
+debian/40alsa etc/mdev.conf.d

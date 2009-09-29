@@ -111,6 +111,7 @@ ifneq (,$(findstring docs,$(SLIND_BUILD_OPTIONS)))
 	dh_installdocs -s
 	dh_installchangelogs -s
 endif
+	dh_install -s
 	dh_strip -s
 	dh_link -s
 	dh_compress -s
@@ -128,6 +129,7 @@ ifneq (,$(findstring docs,$(SLIND_BUILD_OPTIONS)))
 	dh_installdocs -i
 	dh_istallchangelogs -i
 endif
+	dh_install -i
 	dh_installinit -i --no-start -- start 03 S .
 	dh_link -i
 	dh_compress -i
