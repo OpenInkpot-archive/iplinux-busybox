@@ -1,3 +1,18 @@
+busybox (1:1.15.1-3) asimov; urgency=low
+
+  * ash:
+    - Cherry-picked patch 2f3f09c2 from trunk, fixes Ctrl-D behaviour (OI#515).
+  * mdev:
+    - Enabled regex matching in mdev.conf, necessary for ALSA rules.
+    - ALSA rules added (OI#519).
+    - mdev.conf.d/00header installed, it was accidentally skipped before.
+  * module-init-tools:
+    - Disabled Linux 2.4 support.
+  * runit:
+    - Enable.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Tue, 29 Sep 2009 06:49:38 +0700
+
 busybox (1:1.15.1-2) asimov; urgency=low
 
   * Re-enable support for long options in utilities.
