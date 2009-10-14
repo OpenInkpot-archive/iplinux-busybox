@@ -114,6 +114,9 @@ endif
 	dh_install -s
 	dh_strip -s
 	dh_link -s
+	@find debian/busybox/sbin -type l | xargs -n1 ln -sf ../bin/busybox
+	@find debian/busybox/usr/bin -type l | xargs -n1 ln -sf ../../bin/busybox
+	@find debian/busybox/usr/sbin -type l | xargs -n1 ln -sf ../../bin/busybox
 	dh_compress -s
 	dh_fixperms -s
 	dh_installdeb -s
