@@ -1,0 +1,105 @@
+From 36c5eb26b29411fe18e677a853dbb26fe3e2f3c8 Mon Sep 17 00:00:00 2001
+From: Mikhail Gusarov <dottedmag@dottedmag.net>
+Date: Tue, 19 Jan 2010 20:00:42 +0600
+Subject: [PATCH] tar: handle -m (--touch) switch, enabled by FEATURE_TAR_NOPRESERVE_TIME
+
+function                                             old     new   delta
+tar_main                                             611     623     +12
+tar_longopts                                         188     196      +8
+.rodata                                            54423   54431      +8
+------------------------------------------------------------------------------
+(add/remove: 0/0 grow/shrink: 3/0 up/down: 28/0)               Total: 28 bytes
+
+Signed-off-by: Mikhail Gusarov <dottedmag@dottedmag.net>
+---
+ archival/Config.in |    7 +++++++
+ archival/tar.c     |   10 ++++++++++
+ include/usage.h    |    5 ++++-
+ 3 files changed, 21 insertions(+), 1 deletions(-)
+
+diff --git a/archival/Config.in b/archival/Config.in
+index 71b9538..e7bbc3e 100644
+--- a/archival/Config.in
++++ b/archival/Config.in
+@@ -269,6 +269,13 @@ config FEATURE_TAR_UNAME_GNAME
+ 	  listings (-t) and preserving permissions when unpacking (-p).
+ 	  +200 bytes.
+ 
++config FEATURE_TAR_NOPRESERVE_TIME
++	bool "Enable -m (do not preserve time) option"
++	default n
++	depends on TAR
++	help
++	  With this option busybox supports GNU tar -m (do not preserve time) option.
++
+ endif #tar
+ 
+ config UNCOMPRESS
+diff --git a/archival/tar.c b/archival/tar.c
+index 9b7a42a..c1877a4 100644
+--- a/archival/tar.c
++++ b/archival/tar.c
+@@ -736,6 +736,7 @@ enum {
+ 	IF_FEATURE_TAR_FROM(     OPTBIT_EXCLUDE_FROM,)
+ 	IF_FEATURE_SEAMLESS_GZ(  OPTBIT_GZIP        ,)
+ 	IF_FEATURE_SEAMLESS_Z(   OPTBIT_COMPRESS    ,)
++	IF_FEATURE_TAR_NOPRESERVE_TIME(OPTBIT_NOPRESERVE_TIME,)
+ 	OPTBIT_NOPRESERVE_OWN,
+ 	OPTBIT_NOPRESERVE_PERM,
+ 	OPTBIT_NUMERIC_OWNER,
+@@ -755,6 +756,7 @@ enum {
+ 	OPT_EXCLUDE_FROM = IF_FEATURE_TAR_FROM(     (1 << OPTBIT_EXCLUDE_FROM)) + 0, // X
+ 	OPT_GZIP         = IF_FEATURE_SEAMLESS_GZ(  (1 << OPTBIT_GZIP        )) + 0, // z
+ 	OPT_COMPRESS     = IF_FEATURE_SEAMLESS_Z(   (1 << OPTBIT_COMPRESS    )) + 0, // Z
++	OPT_NOPRESERVE_TIME = IF_FEATURE_TAR_NOPRESERVE_TIME((1 << OPTBIT_NOPRESERVE_TIME)) + 0, // m
+ 	OPT_NOPRESERVE_OWN  = 1 << OPTBIT_NOPRESERVE_OWN , // no-same-owner
+ 	OPT_NOPRESERVE_PERM = 1 << OPTBIT_NOPRESERVE_PERM, // no-same-permissions
+ 	OPT_NUMERIC_OWNER = 1 << OPTBIT_NUMERIC_OWNER,
+@@ -789,6 +791,9 @@ static const char tar_longopts[] ALIGN1 =
+ # if ENABLE_FEATURE_SEAMLESS_Z
+ 	"compress\0"            No_argument       "Z"
+ # endif
++# if ENABLE_FEATURE_TAR_NOPRESERVE_TIME
++	"touch\0"               No_argument       "m"
++# endif
+ 	"numeric-owner\0"       No_argument       "\xfc"
+ 	"no-same-owner\0"       No_argument       "\xfd"
+ 	"no-same-permissions\0" No_argument       "\xfe"
+@@ -891,6 +896,11 @@ int tar_main(int argc UNUSED_PARAM, char **argv)
+ 	if (opt & OPT_COMPRESS)
+ 		get_header_ptr = get_header_tar_Z;
+ 
++#if ENABLE_FEATURE_TAR_NOPRESERVE_TIME
++	if (opt & OPT_NOPRESERVE_TIME)
++		tar_handle->ah_flags &= ~ARCHIVE_PRESERVE_DATE;
++#endif
++
+ #if ENABLE_FEATURE_TAR_FROM
+ 	tar_handle->reject = append_file_list_to_list(tar_handle->reject);
+ #if ENABLE_FEATURE_TAR_LONG_OPTIONS
+diff --git a/include/usage.h b/include/usage.h
+index 81baf4c..d4bfa56 100644
+--- a/include/usage.h
++++ b/include/usage.h
+@@ -4340,7 +4340,7 @@
+ #define tar_trivial_usage \
+        "-[" IF_FEATURE_TAR_CREATE("c") IF_FEATURE_SEAMLESS_GZ("z") \
+ 	IF_FEATURE_SEAMLESS_BZ2("j") IF_FEATURE_SEAMLESS_LZMA("a") \
+-	IF_FEATURE_SEAMLESS_Z("Z") "xtvO] " \
++	IF_FEATURE_SEAMLESS_Z("Z") IF_FEATURE_TAR_NOPRESERVE_TIME("m") "xtvO] " \
+ 	IF_FEATURE_TAR_FROM("[-X FILE] ") \
+        "[-f TARFILE] [-C DIR] [FILE(s)]..."
+ #define tar_full_usage "\n\n" \
+@@ -4363,6 +4363,9 @@
+ 	IF_FEATURE_SEAMLESS_Z( \
+      "\n	Z	Filter the archive through compress" \
+ 	) \
++	IF_FEATURE_TAR_NOPRESERVE_TIME( \
++     "\n	m	Do not extract files modified time" \
++	) \
+      "\nFile selection:" \
+      "\n	f	Name of TARFILE or \"-\" for stdin" \
+      "\n	O	Extract to stdout" \
+-- 
+1.6.3.3
+
