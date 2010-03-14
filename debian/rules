@@ -74,8 +74,6 @@ build-indep: build-indep-stamp
 build-indep-stamp:
 	dh_testdir
 
-	mkdir -p $(CURDIR)/debian/mdev/etc
-	touch $(CURDIR)/debian/mdev/etc/mdev.conf
 	touch $@
 
 build: build-arch build-indep
