@@ -70,6 +70,12 @@ Description: Tiny utilities for small and embedded systems
 #  provide the expected functionality and behave very much like their GNU
 #  counterparts.
 
+Package: busybox-dbg
+Architecture: any
+Depends: busybox (= ${binary:Version})
+Description: Tiny utilities for small and embedded systems -- debug symbols
+ This package contains a debugging symbols for busybox.
+
 Package: hwclock
 Architecture: all
 Depends: busybox | busybox-heavy | busybox-static

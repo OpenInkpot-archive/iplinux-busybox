@@ -110,7 +110,7 @@ ifneq (,$(findstring docs,$(SLIND_BUILD_OPTIONS)))
 	dh_installchangelogs -s
 endif
 	dh_install -s
-	dh_strip -s
+	dh_strip -s --dbg-package=busybox-dbg
 	dh_link -s
 	@find debian/busybox/sbin -type l | xargs -n1 ln -sf ../bin/busybox
 	@find debian/busybox/usr/bin -type l | xargs -n1 ln -sf ../../bin/busybox
