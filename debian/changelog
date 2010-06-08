@@ -1,3 +1,11 @@
+busybox (1:1.16.1-1) zelazny; urgency=low
+
+  * New upstream release.
+  * Add -dbg package.
+  * Enabled running tasks from init with controlling tty
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Wed, 09 Jun 2010 04:13:50 +0700
+
 busybox (1:1.16.0-3) zelazny; urgency=low
 
   * Split mdev to separate package.
