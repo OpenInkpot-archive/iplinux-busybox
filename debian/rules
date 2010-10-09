@@ -21,7 +21,7 @@ export EXTRA_VERSION CONFIG_DEBUG
 
 PACKAGE_PREFIX = busybox
 VERSION = $(shell dpkg-parsechangelog|awk '/^Version: / {print $$2}')
-VARIANTS := busybox busybox-static
+VARIANTS := busybox
 #
 # Uncomment this and parts of debian/control to enable building all variants of busybox
 #

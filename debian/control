@@ -21,55 +21,6 @@ Description: Tiny utilities for small and embedded systems
  provide the expected functionality and behave very much like their GNU
  counterparts.
 
-Package: busybox-static
-Architecture: any
-Depends: ${shlibs:Depends}
-Conflicts: adduser, awk, bsdutils, busybox, coreutils, dash, dpkg, hostname, iputils-ping, login, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, procps, psmisc, sed, sysvinit, tar, tftp, tftp-hpa, wget
-Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-dpkg, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-tar, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
-Replaces: busybox, busybox-tiny, busybox-heavy
-Description: Tiny utilities for small and embedded systems
- BusyBox combines tiny versions of many common UNIX utilities into a single
- small executable. It provides minimalist replacements for the most common
- utilities you would usually find on your desktop system (i.e., ls, cp, mv,
- mount, tar, etc.).  The utilities in BusyBox generally have fewer options than
- their full-featured GNU cousins; however, the options that are included
- provide the expected functionality and behave very much like their GNU
- counterparts.
- .
- This package contains a statically compiled version of busybox, designed
- specially to replace coreutils as well as some other packages on a system
- very limited embedded system.
-
-# Package: busybox-tiny
-# Architecture: any
-# Depends: ${shlibs:Depends}
-# Conflicts: adduser, awk, bsdutils, busybox-static, coreutils, dash, hostname, iputils-ping, login, mini-findutils, mini-util-linux, ncurses-bin, net-tools, passwd, psmisc, sed, sysvinit, tar
-# Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-passwd, slind-virtual-ping, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-util-linux, slind-virtual-tar
-# Replaces: busybox, busybox-static, busybox-heavy
-# Description: Tiny utilities for small and embedded systems
-#  BusyBox combines tiny versions of many common UNIX utilities into a single
-#  small executable. It provides minimalist replacements for the most common
-#  utilities you would usually find on your desktop system (i.e., ls, cp, mv,
-#  mount, tar, etc.). The utilities in BusyBox generally have fewer options than
-#  their full-featured GNU cousins; however, the options that are included
-#  provide the expected functionality and behave very much like their GNU
-#  counterparts.
-
-# Package: busybox-heavy
-# Architecture: any
-# Depends: ${shlibs:Depends}
-# Conflicts: adduser, ar, awk, bsdutils, busybox-static, coreutils, cpio, dash, diff, hostname, ip, iputils-ping, login, fbset, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, patch, procps, psmisc, sed, sharutils, sysvinit, tar, telnet, tftp, tftp-hpa, wget, udhcpc
-# Provides: awk, slind-virtual-adduser, slind-virtual-ar, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-cpio, slind-virtual-debianutils, slind-virtual-dhcpc, slind-virtual-diff, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-fbset, slind-virtual-ip, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-patch, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-sharutils, slind-virtual-shell, slind-virtual-tar, slind-virtual-telnet, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
-# Replaces: busybox-static, busybox-tiny, busybox
-# Description: Tiny utilities for small and embedded systems
-#  BusyBox combines tiny versions of many common UNIX utilities into a single
-#  small executable. It provides minimalist replacements for the most common
-#  utilities you would usually find on your desktop system (i.e., ls, cp, mv,
-#  mount, tar, etc.). The utilities in BusyBox generally have fewer options than
-#  their full-featured GNU cousins; however, the options that are included
-#  provide the expected functionality and behave very much like their GNU
-#  counterparts.
-
 Package: busybox-dbg
 Architecture: any
 Depends: busybox (= ${binary:Version})
