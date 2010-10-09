@@ -1,3 +1,13 @@
+busybox (1:1.17.2-1) zelazny; urgency=low
+
+  * New upstream release.
+    - enable xz, bootchart, rev, flock, smemcap.
+  * Remove busybox-cvs, busybox-static variants.
+  * Enable nofork execution of applets.
+  * Disable standalone shell to stop confusing pstree.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Sat, 09 Oct 2010 10:31:20 +0400
+
 busybox (1:1.16.1-1) zelazny; urgency=low
 
   * New upstream release.
