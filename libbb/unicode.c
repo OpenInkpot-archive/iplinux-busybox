@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2009 Denys Vlasenko
  *
- * Licensed under GPL version 2, see file LICENSE in this tarball for details.
+ * Licensed under GPLv2, see file LICENSE in this source tree.
  */
 #include "libbb.h"
 #include "unicode.h"
@@ -131,7 +131,7 @@ size_t FAST_FUNC wcstombs(char *dest, const wchar_t *src, size_t n)
 		size_t len = wcrtomb_internal(tbuf, wc);
 
 		if (len > n)
-			len = n;
+			break;
 		memcpy(dest, tbuf, len);
 		if (wc == L'\0')
 			return org_n - n;
@@ -1005,8 +1005,11 @@ static char* FAST_FUNC unicode_conv_to_printable2(uni_stat_t *stats, const char 
 				d++;
 			}
 		}
-		if (stats)
-			stats->byte_count = stats->unicode_count = (d - dst);
+		if (stats) {
+			stats->byte_count = (d - dst);
+			stats->unicode_count = (d - dst);
+			stats->unicode_width = (d - dst);
+		}
 		return dst;
 	}
 

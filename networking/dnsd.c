@@ -6,7 +6,7 @@
  * Copyright (C) 2005 Odd Arild Olsen (oao at fibula dot no)
  * Copyright (C) 2003 Paul Sheer
  *
- * Licensed under GPLv2 or later, see file LICENSE in this tarball for details.
+ * Licensed under GPLv2 or later, see file LICENSE in this source tree.
  *
  * Odd Arild Olsen started out with the sheerdns [1] of Paul Sheer and rewrote
  * it into a shape which I believe is both easier to understand and maintain.
@@ -388,7 +388,7 @@ static int process_packet(struct dns_entry *conf_data,
 	query_len = strlen(query_string) + 1;
 	/* may be unaligned! */
 	unaligned_type_class = (void *)(query_string + query_len);
-	query_len += sizeof(unaligned_type_class);
+	query_len += sizeof(*unaligned_type_class);
 	/* where to append answer block */
 	answb = (void *)(unaligned_type_class + 1);
 
