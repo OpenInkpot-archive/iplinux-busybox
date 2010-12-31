@@ -198,7 +198,7 @@ static void init(const char *cfg_filename)
 		if (i < 0)
 			bb_error_msg_and_die("syntax error: '%s'", token[0]);
 		if (i >= 0 && i < CONFIG_OPTIONS) {
-			unsigned val = xatoi_u(token[1]);
+			unsigned val = xatoi_positive(token[1]);
 			G.ns[i] = val;
 		} else if(i == 6) {
 			if(G.image_filename == NULL || G.image_filename[0] == '\0')
