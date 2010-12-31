@@ -1,6 +1,7 @@
 busybox (1:1.18.1-1) zelazny; urgency=low
 
   * New upstream release - enable mountpoint, flash_eraseall, mountpoint.
+  * Adjust esplash to changed libbb.
 
  -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 31 Dec 2010 14:19:39 +0100
 
