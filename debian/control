@@ -9,7 +9,7 @@ Standards-Version: 3.8.0
 Package: busybox
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: adduser, awk, bsdutils, busybox-static, coreutils, dash, hostname, iputils-ping, login, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, procps, psmisc, sed, sysvinit, tar, tftp, tftp-hpa, wget
+Conflicts: adduser, awk, bsdutils, busybox-static, coreutils, dash, hostname, iputils-ping, login, mini-findutils, mini-util-linux, module-init-tools, modutils, ncurses-bin, net-tools, passwd, procps, psmisc, sed, sysvinit, tar, tftp, tftp-hpa, wget, dpkg (<= 1.15.4+1.15.5-0.ip7), mtd-utils, initscripts (<= 2.86.ds1-zz.ip9)
 Provides: awk, slind-virtual-adduser, slind-virtual-awk, slind-virtual-bsdutils, slind-virtual-coreutils, slind-virtual-debianutils, slind-virtual-findutils, slind-virtual-hostname, slind-virtual-ifupdown, slind-virtual-init, slind-virtual-login, slind-virtual-module-init-tools, slind-virtual-modutils, slind-virtual-ncurses-bin, slind-virtual-net-tools, slind-virtual-netstat, slind-virtual-passwd, slind-virtual-ping, slind-virtual-procps, slind-virtual-psmisc, slind-virtual-sed, slind-virtual-shell, slind-virtual-tar, slind-virtual-tftp, slind-virtual-util-linux, slind-virtual-wget
 Replaces: busybox-static, busybox-tiny, busybox-heavy
 Description: Tiny utilities for small and embedded systems
